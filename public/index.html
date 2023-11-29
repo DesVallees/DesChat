@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <title>DesChat</title>
+    <link rel="icon" type="image/icon" href="Desvallees.png">
+    <link rel="stylesheet" href="/style.css">
+    <script type="module" src="/script.js"></script>
+    
+    <script defer src="/__/firebase/9.8.1/firebase-app-compat.js"></script>
+    <script defer src="/__/firebase/9.8.1/firebase-firestore-compat.js"></script>
+    <script defer src="/__/firebase/9.8.1/firebase-functions-compat.js"></script>
+    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+    <script defer src="/des.js"></script>
+</head>
+
+<body>
+    <script id="vertex" type="text/glsl">
+    #define NORMAL
+
+    #if defined( FLAT_SHADED ) || defined( USE_BUMPMAP ) || defined( TANGENTSPACE_NORMALMAP )
+    
+        varying vec3 vViewPosition;
+    
+    #endif
+    
+    #include <common>
+    #include <uv_pars_vertex>
+    #include <displacementmap_pars_vertex>
+    #include <normal_pars_vertex>
+    #include <morphtarget_pars_vertex>
+    #include <skinning_pars_vertex>
+    #include <logdepthbuf_pars_vertex>
+    #include <clipping_planes_pars_vertex>
+    
+    void main() {
+    
+        #include <uv_vertex>
+    
+        #include <beginnormal_vertex>
+        #include <morphnormal_vertex>
+        #include <skinbase_vertex>
+        #include <skinnormal_vertex>
+        #include <defaultnormal_vertex>
+        #include <normal_vertex>
+    
+        #include <begin_vertex>
+        #include <morphtarget_vertex>
+        #include <skinning_vertex>
+        #include <displacementmap_vertex>
+        #include <project_vertex>
+        #include <logdepthbuf_vertex>
+        #include <clipping_planes_vertex>
+    
+    #if defined( FLAT_SHADED ) || defined( USE_BUMPMAP ) || defined( TANGENTSPACE_NORMALMAP )
+    
+        vViewPosition = - mvPosition.xyz;
+    
+    #endif
+    
+    }
+  </script>
+    <script id="fragment" type="text/glsl">
+      uniform vec3 colorA;
+
+      #define NORMAL
+
+      #if defined( FLAT_SHADED ) || defined( USE_BUMPMAP ) || defined( TANGENTSPACE_NORMALMAP )
+      
+          varying vec3 vViewPosition;
+      
+      #endif
+      
+      #include <packing>
+      #include <uv_pars_fragment>
+      #include <normal_pars_fragment>
+      #include <bumpmap_pars_fragment>
+      #include <normalmap_pars_fragment>
+      #include <logdepthbuf_pars_fragment>
+      #include <clipping_planes_pars_fragment>
+      
+      void main() {
+      
+          #include <clipping_planes_fragment>
+          #include <logdepthbuf_fragment>
+          #include <normal_fragment_begin>
+          #include <normal_fragment_maps>
+      
+          gl_FragColor = vec4( normalize( normal ) * colorA + 0.5, 1.0 );
+      
+          #ifdef OPAQUE
+      
+              gl_FragColor.a = 1.0;
+      
+          #endif
+      
+      }
+  </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vidaloka&display=swap" rel="stylesheet">
+
+   
+    <button type="button" aria-label="open chat window" id="openChat" onclick="openChat()"><ion-icon name="chatbubbles-outline"></ion-icon></button>
+    <div id="chatOverlay" onclick="(!chatContainer.contains(event.target)) ? closeChat() : ''">
+        <div id="chatContainer">
+            <div id="chatList">
+                <div id="contactSelf" class="contactContainer">
+                    <div id="selfPP" class="profilePicture"></div>
+                    <div class="contactText">
+                        <div id="selfName" class="contactName"></div>
+                        <div id="selfDescription" class="contactDescription"></div>
+                    </div>
+                </div>
+                <div id="filterChats">
+                    <div id="filterChatsIcon" onclick="filterChatsInput.focus()" class=""><ion-icon name="search-outline"></ion-icon></div>
+                    <input type="search" id="filterChatsInput" autocomplete="off" placeholder="Search Chat" oninput="filterChatList(this.value)">
+                </div>
+                <button type="button" aria-label="Skip to write a message input" id="skipToWriteMessage" onclick="textInput.focus()">Skip to 'Write a Message'</button>
+                <div id="chatListMain"></div>
+            </div>
+    
+            <div id="chatMain">
+                <div id="chatMainHeader">
+                    <div class="contactContainer" tabindex="0" aria-label="edit contact" onkeypress="(event.key == 'Enter' || event.key == ' ') ? openContact(false) : ''" onclick="openContact(false)">
+                        <div class="profilePicture"></div>
+                        <div class="contactText">
+                            <div class="contactName"></div>
+                            <div class="contactDescription"></div>
+                        </div>
+                    </div>
+                    <div id="headerButtons">
+                        <button type="button" aria-label="add a new contact" id="headerAdd" class="iconButton" onclick="openContact(true)"><ion-icon name="add-outline"></ion-icon></button>
+                        <button type="button" aria-label="close chat window" id="closeChat" class="iconButton" onclick="closeChat()"><ion-icon name="close-outline"></ion-icon></button>
+                    </div>
+                </div>
+    
+                <div id="chatMainBody">
+                    <div id="chatMainDisplay"></div>
+                </div>
+    
+                <div id="chatMainFooter">
+                    <div class="predeterminedMessagesContainer" style="display:none"></div>
+                    <div id="inputContainer">
+                        <button type="button" aria-label="predetermined messages" style="transform: translateY(.1em);" id="mic" class="iconButton" onclick="togglePredetermined()"><ion-icon name="apps-outline"></ion-icon></button>
+                        <textarea name="textInput" id="textInput" placeholder="Write a message" rows="1" oninput='adjustTextArea(this)' onfocus='adjustTextArea(this)'></textarea>
+                        <div id="fileDisplayContainer" style="display: none;">
+                            <a id="fileDisplay" disabled target="_blank"></a>
+                            <button type="button" aria-label="cancel file send" tabindex="0" onclick="sendingFile(false)" id="cancelFileSend" class="iconButton"><ion-icon name="close-outline"></ion-icon></button>
+                        </div>
+                        <label for="camera" tabindex="0" onkeypress="(event.key == 'Enter' || event.key == ' ') ? camera.click() : ''" aria-label="send a photo" id="cameraLabel" class="iconButton"><ion-icon name="image-outline"></ion-icon></label>
+                        <input type="file" id="camera" name="camera" accept="image/*" style="display: none;">
+                        <label for="files" tabindex="0" onkeypress="(event.key == 'Enter' || event.key == ' ') ? files.click() : ''" aria-label="send a file" id="filesLabel" class="iconButton"><ion-icon name="attach-outline"></ion-icon></label>
+                        <input type="file" id="files" name="files" style="display: none;">
+                        <button aria-label="send" type="button" onclick="newMessage()" id="sendInput" class="iconButton" style="transform: translateY(.1em); width: 0; margin-inline: 0;" disabled><ion-icon name="send-outline"></ion-icon></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="addContactOverlay">
+        <div id="addContactContainer">
+            <form id="addContactForm">
+                <div id="addContactHeader">
+                    <button type="button" id="addContactCancel">Cancel</button>
+                    <button type="submit" id="addContactSave" name="addContactSave">Add Contact</button>
+                </div>
+    
+                <label for="addContactPicture" tabindex="0" onkeypress="(event.key == 'Enter' || event.key == ' ') ? addContactPicture.click() : ''" aria-label="Profile Picture" id="addContactPictureLabel" style="background-image: url('https://support.jfrog.com/profilephoto/72969000000Qdj1/M');"></label>
+                <input type="file" id="addContactPicture" name="addContactPicture" accept=".jpg, .jpeg, .png" style="display: none;">
+                <input type="text" name="addContactName" id="addContactName" class="addContactInput" placeholder="Contact Name" autocomplete="off">
+                <input type="tel" minlength="8" maxlength="18" oninput="phoneFormat(this)" placeholder="Phone Number" required name="addContactPhone" id="addContactPhone" class="addContactInput" autocomplete="off">
+    
+                <button type="button" id="deleteContact" name="deleteContact" onclick="deleteChat()"><ion-icon name="trash-outline"></ion-icon> Delete Contact</button>
+            </form>
+        </div>
+    </div>
+    
+    <script suppress-error="BL9992" type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script suppress-error="BL9992" nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    
+
+    <!-- <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script> -->
+</body>
+
+</html>

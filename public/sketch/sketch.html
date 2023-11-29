@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sketch</title>
+    <link rel="icon" type="image/icon" href="Desvallees.png">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Times New Roman', Times, serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        ion-icon {
+            pointer-events: none;
+        }
+
+        button,
+        input {
+            outline: none;
+            border: none;
+            padding: 0;
+            background-color: transparent;
+            font-family: inherit;
+        }
+
+        ::-webkit-scrollbar{
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track{
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb{
+            background: transparent;
+        }
+
+        .main{
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: flex-start;
+            overflow-x: auto;
+            overflow-y: visible;
+            scroll-behavior: smooth;
+            box-shadow: inset 0 0 0 0 #5a1605;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #0c2269, #26cee4);
+            background-size: 400% 400%;
+            transition: background-position 2s;
+            background-position: 30% 50%;
+        }
+
+        .statsContainer{
+            min-width: max-content;
+            display: flex;
+            gap: 87px;
+            align-items: center;
+            padding-right: calc((100vw - 350px) / 2);
+            padding-left: calc((100vw - 350px) / 2);
+        }
+
+        .stats {
+            position: relative;
+            width: 350px;
+            height: 190px;
+            min-width: 350px;
+            min-height: 190px;
+            transition: all .5s;
+            max-height: 85vh;
+            max-width: 90vw;
+        }
+
+        .statsCard {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: all .5s ease;
+        }
+
+        .statsFront {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            box-shadow: 0 35px 80px rgba(255, 255, 255, 0.15);
+            backface-visibility: hidden;
+            background-color: white;
+        }
+
+        .statsBack {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            box-shadow: 0 35px 80px rgba(255, 255, 255, 0.15);
+            backface-visibility: hidden;
+            background-color: white;
+            overflow: hidden;
+            transform: rotateY(180deg);
+        }
+
+        .statsImg {
+            position: absolute;
+            left: 50%;
+            top: -50px;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 150px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px #00000021;
+            overflow: hidden;
+            transition: all .5s;
+        }
+
+        .statsImg img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .statsContent {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+
+        .details {
+            padding: 40px;
+            text-align: center;
+            width: 100%;
+            transition: all .5s;
+            transform: translateY(200px);
+        }
+
+        .details h2 {
+            font-size: 1.25em;
+            font-weight: 600;
+            color: #555;
+            line-height: 1.2em;
+        }
+
+        .statsTitle {
+            font-size: .75em;
+            font-weight: 500;
+            opacity: .8;
+        }
+
+        .data {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .data h3 {
+            font-size: 1em;
+            color: #555;
+            width: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            white-space: nowrap;
+            line-height: 1.2em;
+            font-weight: 600;
+            margin: 5px 20px;
+        }
+
+        .dataCat {
+            font-size: .85em;
+            font-weight: 400;
+            opacity: .8;
+        }
+
+        .statsButtons {
+            display: flex;
+            justify-content: center;
+        }
+
+        .statsButtons button {
+            padding: 10px 30px;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 500;
+            background-color: #ff5f95;
+            color: white;
+            cursor: pointer;
+            transition: background-color .2s;
+        }
+
+        .statsButtons button:hover {
+            background-color: #d43170;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="statsContainer"></div>
+    </div>
+
+    <script>
+
+        let people = [
+            {
+                pp: 'https://media.istockphoto.com/id/1309328823/photo/headshot-portrait-of-smiling-male-employee-in-office.jpg?b=1&s=170667a&w=0&k=20&c=MRMqc79PuLmQfxJ99fTfGqHL07EDHqHLWg0Tb4rPXQc=',
+                name: 'John Doe',
+                role: 'Senior Developer',
+                data: [
+                    {
+                        name: 'Days at work',
+                        value: '250',
+                        type: 'good'
+                    },
+                    {
+                        name: 'Illness',
+                        value: '23',
+                        type: 'bad'
+                    },
+                    {
+                        name: 'Vacations',
+                        value: '15',
+                        type: 'bad'
+                    },
+                    {
+                        name: 'Warnings',
+                        value: '2',
+                        type: 'bad'
+                    },
+                ],
+                linkName: 'Evaluate',
+                link: ''
+            },
+            {
+                pp: 'https://shotkit.com/wp-content/uploads/2021/06/cool-profile-pic-matheus-ferrero.jpeg',
+                name: 'Jane Doe',
+                role: 'Senior Developer',
+                data: [
+                    {
+                        name: 'Days at work',
+                        value: '254',
+                        type: 'good'
+                    },
+                    {
+                        name: 'Illness',
+                        value: '3',
+                        type: 'bad'
+                    },
+                    {
+                        name: 'Vacations',
+                        value: '15',
+                        type: 'bad'
+                    },
+                    {
+                        name: 'Warnings',
+                        value: '0',
+                        type: 'bad'
+                    },
+                ],
+                linkName: 'Evaluate',
+                link: ''
+            },
+            {
+                pp: 'https://expertphotography.b-cdn.net/wp-content/uploads/2020/08/social-media-profile-photos-3.jpg',
+                name: 'Ethan Hunt',
+                role: 'Junior Developer',
+                data: [
+                    {
+                        name: 'Days at work',
+                        value: '198',
+                        type: 'good'
+                    },
+                    {
+                        name: 'Illness',
+                        value: '8',
+                        type: 'bad'
+                    },
+                    {
+                        name: 'Vacations',
+                        value: '7',
+                        type: 'bad'
+                    },
+                    {
+                        name: 'Warnings',
+                        value: '2',
+                        type: 'bad'
+                    },
+                ],
+                linkName: 'Evaluate',
+                link: ''
+            },
+        ]
+
+        function get(query = '', container = document) {
+            let attribute = query.substring(0, 1)
+            let queryName = query.substring(1)
+            if (attribute !== '#' && attribute !== '.') {
+                attribute = '.'
+                queryName = query
+            }
+            return container.querySelector(`${attribute}${queryName}`)
+        }
+
+        function getAll(query = '', container = document) {
+            let attribute = query.substring(0, 1)
+            let queryName = query.substring(1)
+            if (attribute !== '#' && attribute !== '.') {
+                attribute = '.'
+                queryName = query
+            }
+            return container.querySelectorAll(`${attribute}${queryName}`)
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        let statsContainer = get('statsContainer')
+        let main = get('main')
+
+        for (let i = 0; i < people.length; i++) {
+            let stat = document.createElement('div') 
+            stat.classList.add('stats')
+
+            const person = people[i];
+            if(person.link === ''){
+                person.link = `https://clappforms.web.app/John_Doe/Sketch/en/${person.name.replaceAll(' ','').toLowerCase()}@gmail.com`
+            }
+
+            let data = ``
+            let good = 1
+            let bad = 1
+            for (let o = 0; o < person.data.length; o++) {
+                const datum = person.data[o];
+                data += `<h3>${datum.value}<br><span class="dataCat">${datum.name}</span></h3>`
+                if (datum.type === 'good' && !isNaN(parseInt(datum.value))) {
+                    good += parseInt(datum.value)
+                }
+                else if (datum.type === 'bad' && !isNaN(parseInt(datum.value))) {
+                    bad += parseInt(datum.value)
+                }
+            }
+            let performance = good / bad
+            let personColor = '60% 50%'
+            if (performance < 8) {
+                personColor = '100% 50%'
+            }
+            else if (performance > 12) {
+                personColor = '0% 50%'
+            }
+            let element = `
+                <div class="statsCard" data-color="${personColor}">
+                    <div class="statsFront">
+                        <div class="statsImg">
+                            <img
+                                src="${person.pp}">
+                        </div>
+                        <div class="statsContent">
+                            <div class="details">
+                                <h2><span class="statsName">${person.name}</span><br><span class="statsTitle">${person.role}</span>
+                                </h2>
+                                <div class="data">${data}</div>
+                                <div class="statsButtons">
+                                    <button class="evaluate" type="button">${person.linkName}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="statsBack">
+                        <iframe src="${person.link}" width="100%" style="height: 100%;"
+                            frameborder="0"></iframe>
+                    </div>
+                </div>
+            `
+            stat.innerHTML = element
+            statsContainer.appendChild(stat)
+        }
+
+        let stats = getAll('stats')
+
+        async function openCard(stat, statsImg, details, statsCard) {
+            stat.style.height = '500px'
+            stat.style.width = '350px'
+            statsImg.style.height = '250px'
+            statsImg.style.width = '250px'
+            details.style.transform = 'translateY(0)'
+            await sleep(250)
+            main.style.backgroundPosition = statsCard.dataset.color
+            main.scrollLeft = stat.offsetLeft - parseFloat(window.getComputedStyle(statsContainer, null).getPropertyValue('padding-left'))
+            document.onclick = (e) => {
+                closeCard(e.target, stat, statsCard, statsImg, details)
+            }
+        }
+        function closeLink (target, stat, statsCard, button, statsImg, details){
+            if (!statsCard.contains(target) && target !== button) {
+                closeCard(target, stat, statsCard, statsImg, details)
+                stat.onclick = () => {
+                    openCard(stat, statsImg, details, statsCard)
+                }
+            }
+        }
+        function closeCard(target, stat, statsCard, statsImg, details) {
+            if (!statsCard.contains(target)) {
+                get('statsFront', stat).style.zIndex = ''
+                get('statsBack', stat).style.zIndex = '-5'
+                stat.style.height = ''
+                stat.style.width = ''
+                statsCard.style.transform = ''
+                statsImg.style.height = ''
+                statsImg.style.width = ''
+                details.style.transform = ''
+                main.style.backgroundPosition = ''
+                main.scrollLeft = stat.offsetLeft - parseFloat(window.getComputedStyle(statsContainer, null).getPropertyValue('padding-left'))
+                document.onclick = () => {}
+            }
+        }
+        
+        stats.forEach((stat) => {
+            let evaluateButtons = getAll('evaluate', stat)
+            let statsCard = get('statsCard', stat)
+            let statsImg = get('statsImg', stat)
+            let details = get('details', stat)
+
+            stat.onclick = () => {
+                openCard(stat, statsImg, details, statsCard)
+            }
+
+            evaluateButtons.forEach((button) => {
+                button.onclick = async() => {
+                    statsCard.style.transform = 'rotateY(180deg)'
+                    get('statsFront', stat).style.zIndex = '-5'
+                    get('statsBack', stat).style.zIndex = ''
+                    stat.style.height = '900px'
+                    stat.style.width = '500px'
+                    statsImg.style.height = ''
+                    statsImg.style.width = ''
+                    details.style.transform = ''
+                    stat.onclick = () => {}
+                    
+                    document.onclick = (e) => {
+                        closeLink(e.target, stat, statsCard, button, statsImg, details)
+                    }
+                    await sleep(200)
+                    main.scrollLeft = stat.offsetLeft - parseFloat(window.getComputedStyle(statsContainer, null).getPropertyValue('padding-left')) + (stat.offsetWidth - 350) / 2
+                }
+            })
+        })
+
+    </script>
+</body>
+
+</html>
